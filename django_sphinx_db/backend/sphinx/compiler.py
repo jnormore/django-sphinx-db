@@ -311,7 +311,7 @@ class SQLUpdateCompiler(compiler.SQLUpdateCompiler, SphinxQLCompiler):
                 values.append(placeholder)
                 params.append(val)
             else:
-                values.append('NULL')
+                values.append("''")
             fields.append(name)
         result.append('(%s)' % ', '.join(fields))
         result.append('VALUES (%s)' % ', '.join(values))
