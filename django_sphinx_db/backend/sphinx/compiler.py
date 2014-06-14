@@ -150,8 +150,13 @@ class SphinxQLCompiler(compiler.SQLCompiler):
         # removing parentheses from group by fields
         for i in range(len(result)):
             g = result[i]
+            db_table = self.query.model._meta.db_table
+            if g.startswith(db_table + '.'):
+                g = g.partition('.')[2]
             if g[0] == '(' and g[-1] == ')':
                 result[i] = g[1:-1]
+            else:
+                result[i] = g
         return result, params
 
     def _serialize(self, values_list):
