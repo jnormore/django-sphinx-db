@@ -289,10 +289,11 @@ class SQLUpdateCompiler(compiler.SQLUpdateCompiler, SphinxQLCompiler):
         fields, values, params = [column_name], ['%s'], [val[0]]
         # Now build the rest of the fields into our query.
         for field, model, val in self.query.values:
-            if hasattr(val, 'prepare_database_save'):
-                val = val.prepare_database_save(field)
-            else:
-                val = field.get_db_prep_save(val, connection=self.connection)
+            if not isinstance(val, (list, tuple)):
+                if hasattr(val, 'prepare_database_save'):
+                    val = val.prepare_database_save(field)
+                else:
+                    val = field.get_db_prep_save(val, connection=self.connection)
 
             # Getting the placeholder for the field.
             if hasattr(field, 'get_placeholder'):
@@ -307,6 +308,9 @@ class SQLUpdateCompiler(compiler.SQLUpdateCompiler, SphinxQLCompiler):
                 sql, params = val.as_sql(qn, self.connection)
                 values.append(sql)
                 params.extend(params)
+            elif isinstance(val, (list, tuple)):
+                # MVA
+                values.append("(%s)"%(','.join(val)))
             elif val is not None:
                 values.append(placeholder)
                 params.append(val)
